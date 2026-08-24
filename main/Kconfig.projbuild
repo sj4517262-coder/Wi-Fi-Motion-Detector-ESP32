@@ -1,0 +1,90 @@
+menu "Wi-Fi Motion Detector"
+
+    menu "Wi-Fi connection"
+
+        config WMD_WIFI_SSID
+            string "WiFi SSID"
+            default "myssid"
+            help
+                Name of the network the detector associates with. CSI is
+                measured on the link to this access point, so pick the AP whose
+                radio path passes through the space you want to monitor.
+
+        config WMD_WIFI_PASSWORD
+            string "WiFi Password"
+            default "mypassword"
+            help
+                WPA/WPA2 passphrase. Leave empty for an open network.
+
+        config WMD_WIFI_MAX_RETRY
+            int "Maximum reconnection attempts"
+            range 1 100
+            default 10
+            help
+                How many times to retry association before rebooting.
+
+        choice WMD_SCAN_METHOD
+            prompt "Scan method"
+            default WMD_WIFI_ALL_CHANNEL_SCAN
+            help
+                All-channel scan is slower to associate but picks the strongest
+                matching AP, which gives a more stable link and therefore
+                cleaner CSI.
+
+            config WMD_WIFI_FAST_SCAN
+                bool "fast"
+            config WMD_WIFI_ALL_CHANNEL_SCAN
+                bool "all"
+        endchoice
+
+        choice WMD_SORT_METHOD
+            prompt "AP sort method"
+            default WMD_WIFI_CONNECT_AP_BY_SIGNAL
+
+            config WMD_WIFI_CONNECT_AP_BY_SIGNAL
+                bool "rssi"
+            config WMD_WIFI_CONNECT_AP_BY_SECURITY
+                bool "authmode"
+        endchoice
+
+    endmenu
+
+    menu "Sensing"
+
+        config WMD_TRAFFIC_RATE_HZ
+            int "CSI sampling rate (packets per second)"
+            range 5 200
+            default 50
+            help
+                The detector transmits this many UDP packets per second to the
+                gateway; each one is acknowledged by the AP and every ACK
+                yields one CSI record. Higher rates give finer temporal detail
+                but more airtime, more heat and more serial bandwidth.
+
+                50 Hz is a good default: human motion lives below ~5 Hz, so
+                50 Hz leaves ample headroom above the Nyquist limit.
+
+    endmenu
+
+    menu "Outputs"
+
+        config WMD_LED_GPIO
+            int "Motion indicator GPIO"
+            range 0 39
+            default 19
+            help
+                Drives the motion LED. Wire the LED anode here through a 220R
+                resistor to ground. Avoid GPIO 6-11 (connected to flash) and
+                34-39 (input only).
+
+        config WMD_SERIAL_CSV
+            bool "Stream CSI as CSV on the serial console"
+            default y
+            help
+                Prints one CSV line per CSI sample. Required by the Python
+                data-collection tooling. Turn it off once the model is trained
+                and the device runs standalone - it costs real CPU time.
+
+    endmenu
+
+endmenu

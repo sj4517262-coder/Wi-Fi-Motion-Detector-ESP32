@@ -1,0 +1,51 @@
+# Defaults for the Wi-Fi CSI Motion Detector.
+#
+# These are applied when sdkconfig is regenerated. If you already have an
+# sdkconfig, delete it (or set these via `idf.py menuconfig`) so they take
+# effect - the ones marked REQUIRED are not optional.
+
+CONFIG_IDF_TARGET="esp32"
+
+# --- REQUIRED: without this the CSI API is compiled out entirely -----------
+CONFIG_ESP_WIFI_CSI_ENABLED=y
+
+# --- Serial console -------------------------------------------------------
+# At 50 Hz the CSV stream is ~15 kB/s. The default 115200 baud cannot carry
+# that and you will silently lose samples.
+CONFIG_ESP_CONSOLE_UART_DEFAULT=y
+CONFIG_ESP_CONSOLE_UART_CUSTOM=y
+CONFIG_ESP_CONSOLE_UART_BAUDRATE=921600
+
+# --- Wi-Fi buffers --------------------------------------------------------
+# CSI generates a lot of small RX events. More static RX buffers keeps the
+# driver from dropping frames under load.
+CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=16
+CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM=32
+CONFIG_ESP_WIFI_DYNAMIC_TX_BUFFER_NUM=32
+CONFIG_ESP_WIFI_AMPDU_RX_ENABLED=y
+
+# --- Power management -----------------------------------------------------
+# Any form of sleep destroys the timing regularity that sensing depends on.
+CONFIG_PM_ENABLE=n
+CONFIG_ESP_WIFI_SLP_IRAM_OPT=n
+
+# --- CPU ------------------------------------------------------------------
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+CONFIG_FREERTOS_HZ=1000
+
+# --- Floating point -------------------------------------------------------
+# Feature extraction runs in float; let it use the FPU from any task.
+CONFIG_FREERTOS_FPU_IN_ISR=n
+
+# --- Watchdogs ------------------------------------------------------------
+# Keep the task watchdog on. It is what would have caught the original
+# MotionDetector busy-loop.
+CONFIG_ESP_TASK_WDT_INIT=y
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=10
+
+# --- Logging --------------------------------------------------------------
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+
+# --- HTTP server (Step 3) -------------------------------------------------
+CONFIG_HTTPD_WS_SUPPORT=y
+CONFIG_HTTPD_MAX_REQ_HDR_LEN=1024

@@ -1,0 +1,2 @@
+source D:/wifi_scan_project/build/bootloader/gdbinit/symbols
+source D:/wifi_scan_project/build/bootloader/gdbinit/connect
